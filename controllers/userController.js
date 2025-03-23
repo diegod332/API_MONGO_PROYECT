@@ -55,16 +55,75 @@ exports.login = async (req, res) => {
     }
 
     // Generar token JWT
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET,{ expiresIn: '1h' });
+    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET,{ expiresIn: '1h' });
     res.json({ message: 'Inicio de sesión exitoso',
         user: {
             id: user._id,
             name: user.name,
             email: user.email,
+            role: user.role,
         } ,token 
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+};
+
+// Actualizar usuario
+exports.updateUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Verificar si el usuario existe
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+
+    // Verificar la contraseña
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: 'Contraseña incorrecta' });
+    }
+
+    // Generar token JWT con el rol incluido
+    const token = jwt.sign(
+      { id: user._id, role: user.role }, // Incluir el rol en el token
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    res.json({
+      message: 'Inicio de sesión exitoso',
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role, // Incluir el rol en la respuesta
+      },
+      token,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+// Eliminar usuario
+exports.deleteUser = async (req, res) => {
+  try {
+    // Buscar al usuario por su ID
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+
+    // Eliminar al usuario
+    await user.remove();
+
+    res.status(200).json({ message: 'Usuario eliminado exitosamente' });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al eliminar el usuario' });
   }
 };
 
@@ -80,6 +139,7 @@ exports.getProfile = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
+        role: user.role,
         profilePicture: user.profilePicture,
         createdAt: user.createdAt,
       };
@@ -89,3 +149,4 @@ exports.getProfile = async (req, res) => {
       res.status(500).json({ error: 'Error al obtener el perfil del usuario' });
     }
   };
+  

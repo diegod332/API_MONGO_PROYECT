@@ -5,14 +5,11 @@ const userSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
-    trim: true,
   },
   email: {
     type: String,
     required: true,
     unique: true,
-    trim: true,
-    lowercase: true,
   },
   password: {
     type: String,
@@ -20,7 +17,12 @@ const userSchema = new mongoose.Schema({
   },
   profilePicture: {
     type: String,
-    default: null, // Opcional: puedes agregar una URL para la foto de perfil
+    default: null, 
+  },
+  role: {
+    type: String,
+    enum: ['user', 'admin'], // Roles disponibles
+    default: 'user', // Por defecto, todos los usuarios son "user"
   },
   createdAt: {
     type: Date,
