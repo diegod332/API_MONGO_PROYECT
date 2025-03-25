@@ -1,6 +1,7 @@
 const User = require('../models/userModel');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 
 // Registrar usuario
 exports.register = async (req, res) => {
@@ -55,20 +56,30 @@ exports.login = async (req, res) => {
     }
 
     // Generar token JWT
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET,{ expiresIn: '1h' });
-    res.json({ message: 'Inicio de sesión exitoso',
-        user: {
-            id: user._id,
-            name: user.name,
-            email: user.email,
-            role: user.role,
-        } ,token 
+    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    // Generar refresh token
+    const refreshToken = crypto.randomBytes(40).toString('hex');
+
+    // Guardar el refresh token en la base de datos o en memoria
+    user.refreshToken = refreshToken;
+    await user.save();
+
+    res.json({
+      message: 'Inicio de sesión exitoso',
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+      token,
+      refreshToken, // Enviar el refresh token al cliente
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
-
 // Actualizar usuario
 exports.updateUser = async (req, res) => {
   try {
@@ -150,3 +161,39 @@ exports.getProfile = async (req, res) => {
     }
   };
   
+  exports.refreshToken = async (req, res) => {
+    try {
+      const { refreshToken } = req.body;
+  
+      // Verificar si el refresh token existe
+      const user = await User.findOne({ refreshToken });
+      if (!user) {
+        return res.status(403).json({ message: 'Refresh token inválido' });
+      }
+  
+      // Generar un nuevo token JWT
+      const newToken = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+  
+      res.json({
+        token: newToken,
+      });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  };
+
+  exports.logout = async (req, res) => {
+    try {
+      const { refreshToken } = req.body;
+  
+      // Eliminar el refresh token del usuario
+      const user = await User.findOneAndUpdate({ refreshToken }, { refreshToken: null });
+      if (!user) {
+        return res.status(404).json({ message: 'Usuario no encontrado' });
+      }
+  
+      res.status(200).json({ message: 'Cierre de sesión exitoso' });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  };

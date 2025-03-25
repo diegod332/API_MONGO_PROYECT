@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema({
   },
   profilePicture: {
     type: String,
-    default: null, 
+    default: null,
   },
   role: {
     type: String,
@@ -27,6 +27,10 @@ const userSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now,
+  },
+  refreshToken: {
+    type: String, // Campo para almacenar el refresh token
+    default: null,
   },
 });
 

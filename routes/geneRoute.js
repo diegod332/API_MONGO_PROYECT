@@ -10,6 +10,8 @@ const router = express.Router();
 // Rutas de usuario
 router.post('/register', userController.register); // Ruta para registrar usuario
 router.post('/login', userController.login); // Ruta para iniciar sesión
+router.post('/refresh', userController.refreshToken); // Ruta para renovar el token
+router.post('/logout', userController.logout); // Ruta para cerrar sesión
 router.get('/profile', authMiddleware, userController.getProfile); // Ruta para obtener perfil (protegida con middleware)
 router.put('/update', authMiddleware, userController.updateUser); // Ruta para actualizar usuario
 router.delete('/delete', authMiddleware, userController.deleteUser); // Ruta para eliminar usuario
