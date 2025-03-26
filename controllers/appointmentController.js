@@ -4,9 +4,21 @@ const Appointment = require('../models/appointmentModel');
 exports.getAllAppointments = async (req, res) => {
   try {
     const appointments = await Appointment.find({ deletedAt: null })
-      .populate('client', 'firstName middleName lastName emergencyNumber ') // Poblar datos del cliente
-      .populate('services', 'serviceName price'); // Poblar datos de los servicios
-    res.status(200).json(appointments);
+      .populate('client', 'firstName middleName lastName emergencyNumber') // Poblar datos del cliente
+      .populate('services', 'serviceName'); // Poblar datos de los servicios
+
+    // Formatear los datos para devolverlos en el formato requerido
+    const formattedAppointments = appointments.map((appointment) => ({
+      id: appointment._id,
+      fullName: `${appointment.client.firstName} ${appointment.client.middleName} ${appointment.client.lastName}`,
+      emergencyNumber: appointment.client.emergencyNumber, // Incluir emergencyNumber
+      appointmentDate: appointment.appointmentDate,
+      appointmentTime: appointment.appointmentTime,
+      service: appointment.services.map((service) => service.serviceName).join(', '), // Si hay múltiples servicios
+      status: appointment.status,
+    }));
+
+    res.status(200).json({ status: 'success', data: formattedAppointments });
   } catch (error) {
     console.error('Error al obtener las citas:', error);
     res.status(500).json({ error: 'Error al obtener las citas' });
