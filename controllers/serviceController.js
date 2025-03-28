@@ -3,10 +3,7 @@ const Service = require('../models/serviceModel');
 // Obtener todos los servicios
 exports.getAllServices = async (req, res) => {
   try {
-    const services = await Service.find({ deletedAt: null }); // Filtrar servicios no eliminados
-    if (services.length === 0) {
-      return res.status(404).json({ status: 'error', message: 'No hay servicios disponibles' });
-    }
+    const services = await Service.find({  }); // Filtrar servicios no eliminados
     res.status(200).json({ status: 'success', data: services });
   } catch (error) {
     console.error('Error al obtener los servicios:', error);
@@ -17,7 +14,7 @@ exports.getAllServices = async (req, res) => {
 // Obtener servicios para dropdown
 exports.getServicesForDropdown = async (req, res) => {
     try {
-      const services = await Service.find({ deletedAt: null }).select('serviceName price');
+      const services = await Service.find({}).select('serviceName price');
       const formattedServices = services.map(service => ({
         id: service._id,
         name: service.serviceName,
@@ -37,7 +34,7 @@ exports.getServicesByQueryOrId = async (req, res) => {
   try {
     // Validar si el query es un ID válido
     if (mongoose.Types.ObjectId.isValid(query)) {
-      const service = await Service.findOne({ _id: query, deletedAt: null });
+      const service = await Service.findOne({ _id: query,  });
       if (!service) {
         return res.status(404).json({ status: 'error', message: 'Servicio no encontrado' });
       }
@@ -50,7 +47,6 @@ exports.getServicesByQueryOrId = async (req, res) => {
         { serviceName: { $regex: query, $options: 'i' } },
         { price: { $regex: query, $options: 'i' } },
       ],
-      deletedAt: null,
     });
 
     if (services.length === 0) {
@@ -103,7 +99,7 @@ exports.updateService = async (req, res) => {
 
   try {
     const updatedService = await Service.findOneAndUpdate(
-      { _id: req.params.id, deletedAt: null }, // Buscar servicio no eliminado
+      { _id: req.params.id,  }, // Buscar servicio no eliminado
       { serviceName, price, updatedAt: Date.now() },
       { new: true } // Retornar el servicio actualizado
     );
@@ -119,22 +115,20 @@ exports.updateService = async (req, res) => {
   }
 };
 
-// Eliminar un servicio (eliminación lógica)
+
 exports.deleteService = async (req, res) => {
+  const { id } = req.params;
+
   try {
-    const deletedService = await Service.findOneAndUpdate(
-      { _id: req.params.id, deletedAt: null }, // Buscar servicio no eliminado
-      { deletedAt: Date.now() }, // Marcar como eliminado
-      { new: true }
-    );
+    const deletedService = await Service.findByIdAndDelete(id); 
 
     if (!deletedService) {
-      return res.status(404).json({ status: 'error', message: 'Servicio no encontrado o ya eliminado' });
+      return res.status(404).json({ status: 'error', message: 'Servicio no encontrado' });
     }
 
     res.status(200).json({ status: 'success', message: 'Servicio eliminado correctamente' });
   } catch (error) {
-    console.error('Error al eliminar servicio:', error);
-    res.status(500).json({ status: 'error', message: 'Error al eliminar servicio', error: error.message });
+    console.error('Error al eliminar el servicio:', error);
+    res.status(500).json({ status: 'error', message: 'Error al eliminar el servicio', error: error.message });
   }
 };

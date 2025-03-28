@@ -1,13 +1,21 @@
+const moment = require('moment-timezone');
 const Supply = require('../models/supplyModel');
+
 
 // Obtener todos los insumos
 exports.getAllSupplies = async (req, res) => {
   try {
-    const supplies = await Supply.find({ deletedAt: null }); // Filtrar insumos no eliminados
-    if (supplies.length === 0) {
-      return res.status(404).json({ status: 'error', message: 'No hay insumos disponibles' });
-    }
-    res.status(200).json({ status: 'success', data: supplies });
+    const supplies = await Supply.find({});
+
+    // Formatear las fechas antes de enviarlas al frontend
+    const formattedSupplies = supplies.map((supply) => ({
+      ...supply._doc,
+      expirationDate:moment(supply.expirationDate)
+              .tz('America/Mexico_City')
+              .format('YYYY-MM-DD'), 
+    }));
+
+    res.status(200).json({ status: 'success', data: formattedSupplies });
   } catch (error) {
     console.error('Error al obtener los insumos:', error);
     res.status(500).json({ status: 'error', message: 'Error al obtener los insumos', error: error.message });
@@ -18,7 +26,7 @@ exports.getAllSupplies = async (req, res) => {
 exports.getSupplyById = async (req, res) => {
   const { id } = req.params;
   try {
-    const supply = await Supply.findOne({ _id: id, deletedAt: null }); // Buscar insumo no eliminado
+    const supply = await Supply.findOne({ _id: id,}); 
     if (!supply) {
       return res.status(404).json({ status: 'error', message: 'Insumo no encontrado' });
     }
@@ -39,10 +47,13 @@ exports.createSupply = async (req, res) => {
   }
 
   try {
+    // Convertir la fecha al formato ISO
+    const formattedDate = moment(expirationDate, 'YYYY-MM-DD').toDate();
+
     const newSupply = new Supply({
       name,
       quantity,
-      expirationDate,
+      expirationDate: formattedDate,
       price,
     });
     const savedSupply = await newSupply.save();
@@ -59,9 +70,12 @@ exports.updateSupply = async (req, res) => {
   const { name, quantity, expirationDate, price } = req.body;
 
   try {
+
+    const formattedDate = expirationDate ? moment(expirationDate, 'YYYY-MM-DD').toDate() : undefined;
+
     const updatedSupply = await Supply.findOneAndUpdate(
-      { _id: id, deletedAt: null }, // Buscar insumo no eliminado
-      { name, quantity, expirationDate, price, updatedAt: Date.now() },
+      { _id: id,},
+      { name, quantity, expirationDate: formattedDate, price, updatedAt: Date.now() },
       { new: true }
     );
     if (!updatedSupply) {
@@ -74,18 +88,17 @@ exports.updateSupply = async (req, res) => {
   }
 };
 
-// Eliminar un insumo (eliminación lógica)
+// Eliminar un insumo
 exports.deleteSupply = async (req, res) => {
   const { id } = req.params;
+
   try {
-    const deletedSupply = await Supply.findOneAndUpdate(
-      { _id: id, deletedAt: null }, // Buscar insumo no eliminado
-      { deletedAt: Date.now() }, // Marcar como eliminado
-      { new: true }
-    );
+    const deletedSupply = await Supply.findByIdAndDelete(id); 
+
     if (!deletedSupply) {
-      return res.status(404).json({ status: 'error', message: 'Insumo no encontrado o ya eliminado' });
+      return res.status(404).json({ status: 'error', message: 'Insumo no encontrado' });
     }
+
     res.status(200).json({ status: 'success', message: 'Insumo eliminado correctamente' });
   } catch (error) {
     console.error('Error al eliminar el insumo:', error);

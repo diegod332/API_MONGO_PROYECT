@@ -12,21 +12,17 @@ const appointmentSupplySchema = new mongoose.Schema({
     required: true,
   },
   quantityUsed: {
-    type: Number, // Cantidad de suministro utilizado
+    type: Number, 
     required: true,
-    min: 1, // No puede ser menor que 1
+    min: 1,
   },
   createdAt: {
     type: Date,
-    default: Date.now, // Fecha de creación de la relación
+    default: Date.now, 
   },
   updatedAt: {
     type: Date,
-    default: null, // Fecha de última actualización
-  },
-  deletedAt: {
-    type: Date,
-    default: null, // Eliminación lógica
+    default: null,
   },
 });
 

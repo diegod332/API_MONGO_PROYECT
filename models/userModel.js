@@ -1,11 +1,7 @@
 const mongoose = require('mongoose');
 
-// Definición del esquema del usuario
 const userSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-  },
+ 
   email: {
     type: String,
     required: true,
@@ -21,8 +17,13 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['user', 'admin'], // Roles disponibles
-    default: 'user', // Por defecto, todos los usuarios son "user"
+    enum: ['user', 'admin'],
+    default: 'user',
+  },
+  client: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Client', 
+    default: null, 
   },
   createdAt: {
     type: Date,
@@ -34,7 +35,6 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-// Crear el modelo
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;

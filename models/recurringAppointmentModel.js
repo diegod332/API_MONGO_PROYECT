@@ -29,10 +29,6 @@ const recurringAppointmentSchema = new mongoose.Schema({
     default: 'pendiente',
     required: true,
   },
-  deletedAt: {
-    type: Date,
-    default: null, // Eliminación lógica
-  },
   createdAt: {
     type: Date,
     default: Date.now,

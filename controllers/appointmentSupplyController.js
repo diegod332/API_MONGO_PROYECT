@@ -2,7 +2,7 @@ const AppointmentSupply = require('../models/appointmentSupplyModel');
 
 exports.getAllAppointmentSupplies = async (req, res) => {
   try {
-    const appointmentSupplies = await AppointmentSupply.find({ deletedAt: null })
+    const appointmentSupplies = await AppointmentSupply.find({})
       .populate('appointment', 'appointmentDate appointmentTime')
       .populate('supply', 'name quantity');
     if (appointmentSupplies.length === 0) {
@@ -24,7 +24,6 @@ exports.getAppointmentSupplyById = async (req, res) => {
     const appointmentSupply = await AppointmentSupply.findOne({
       appointment: appointment_id,
       supply: supply_id,
-      deletedAt: null,
     })
       .populate('appointment', 'appointmentDate appointmentTime')
       .populate('supply', 'name quantity');
@@ -71,7 +70,7 @@ exports.updateAppointmentSupply = async (req, res) => {
 
   try {
     const updatedAppointmentSupply = await AppointmentSupply.findOneAndUpdate(
-      { appointment: appointment_id, supply: supply_id, deletedAt: null },
+      { appointment: appointment_id, supply: supply_id},
       { quantityUsed, updatedAt: Date.now() },
       { new: true }
     );
@@ -98,7 +97,7 @@ exports.deleteAppointmentSupply = async (req, res) => {
 
   try {
     const deletedAppointmentSupply = await AppointmentSupply.findOneAndUpdate(
-      { appointment: appointment_id, supply: supply_id, deletedAt: null },
+      { appointment: appointment_id, supply: supply_id},
       { deletedAt: Date.now() },
       { new: true }
     );

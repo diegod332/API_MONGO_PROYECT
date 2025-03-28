@@ -10,10 +10,6 @@ const serviceSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  deletedAt: {
-    type: Date, // Campo para eliminación lógica
-    default: null,
-  },
   createdAt: {
     type: Date,
     default: Date.now,

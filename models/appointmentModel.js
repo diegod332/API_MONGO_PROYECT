@@ -10,7 +10,7 @@ const appointmentSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['pendiente', 'confirmado', 'Finalizado'],
+    enum: ['pendiente', 'confirmado', 'cancelado'],
     default: 'pendiente',
     required: true,
   },
@@ -19,15 +19,11 @@ const appointmentSchema = new mongoose.Schema({
     ref: 'Client',
     required: true,
   },
-  services: [
-    {
+  service: { 
+    
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Service',
-    },
-  ],
-  deletedAt: {
-    type: Date,
-    default: null,
+      required: true,
   },
   createdAt: {
     type: Date,

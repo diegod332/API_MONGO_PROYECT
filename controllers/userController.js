@@ -2,11 +2,12 @@ const User = require('../models/userModel');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const Client = require('../models/clientModel'); 
 
-// Registrar usuario
+
 exports.register = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { email, password, role, firstName, lastName, middleName, emergencyNumber } = req.body;
 
     // Validar formato de email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -28,16 +29,50 @@ exports.register = async (req, res) => {
     // Encriptar la contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Crear el nuevo usuario
-    const newUser = new User({ name, email, password: hashedPassword });
-    await newUser.save();
+    // Crear el usuario
+    const newUser = new User({
+      email,
+      password: hashedPassword,
+      role: role || 'user', // Si no se especifica, el rol será "user"
+    });
+    const savedUser = await newUser.save();
 
-    res.status(201).json({ message: 'Usuario registrado exitosamente' });
+    // Si el rol es "user", crear un cliente vinculado
+    if (role === 'user' || !role) {
+      if (!firstName || !lastName || !middleName || !emergencyNumber) {
+        return res.status(400).json({ message: 'Los datos del cliente son obligatorios para usuarios con rol "user"' });
+      }
+
+      const newClient = new Client({
+        firstName,
+        lastName,
+        middleName,
+        emergencyNumber,
+        user: savedUser._id, // Relacionar con el usuario recién creado
+      });
+      const savedClient = await newClient.save();
+
+      // Actualizar el usuario con la referencia al cliente
+      savedUser.client = savedClient._id;
+      await savedUser.save();
+
+      return res.status(201).json({
+        message: 'Usuario y cliente registrados exitosamente',
+        user: savedUser,
+        client: savedClient,
+      });
+    }
+
+    // Si el rol no es "user", solo se crea el usuario
+    res.status(201).json({
+      message: 'Usuario registrado exitosamente',
+      user: savedUser,
+    });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error al registrar usuario:', error);
+    res.status(500).json({ error: 'Error al registrar usuario' });
   }
 };
-
 // Iniciar sesión
 exports.login = async (req, res) => {
   try {

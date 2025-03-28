@@ -19,10 +19,6 @@ const appointmentServiceSchema = new mongoose.Schema({
     type: Date,
     default: null, // Fecha de última actualización
   },
-  deletedAt: {
-    type: Date,
-    default: null, // Eliminación lógica
-  },
 });
 
 module.exports = mongoose.model('AppointmentService', appointmentServiceSchema);

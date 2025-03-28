@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 
-// Definición del esquema de cliente
 const clientSchema = new mongoose.Schema({
   firstName: {
     type: String,
@@ -18,17 +17,13 @@ const clientSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  birthDate: {
-    type: Date,
-    required: true,
-  },
-  totalAppointments: {
-    type: Number,
-    default: 0, 
-  },
   deletedAt: {
     type: Date,
     default: null,
+  },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User', 
   },
   createdAt: {
     type: Date,
@@ -40,7 +35,6 @@ const clientSchema = new mongoose.Schema({
   },
 });
 
-// Crear el modelo
 const Client = mongoose.model('Client', clientSchema);
 
 module.exports = Client;
