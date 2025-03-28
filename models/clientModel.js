@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const User = require('./userModel'); // Asegúrate de importar el modelo de usuario
 
 const clientSchema = new mongoose.Schema({
   firstName: {
@@ -33,6 +34,15 @@ const clientSchema = new mongoose.Schema({
     type: Date,
     default: null,
   },
+});
+
+// Middleware para eliminar el usuario relacionado al eliminar un cliente
+clientSchema.pre('findOneAndDelete', async function (next) {
+  const client = await this.model.findOne(this.getQuery()); // Obtener el cliente que se va a eliminar
+  if (client && client.user) {
+    await User.findByIdAndDelete(client.user); // Eliminar el usuario relacionado
+  }
+  next();
 });
 
 const Client = mongoose.model('Client', clientSchema);

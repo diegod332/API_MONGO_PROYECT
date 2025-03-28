@@ -154,19 +154,20 @@ exports.updateClient = async (req, res) => {
 };
 
 // Eliminar un cliente
+
 exports.deleteClient = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const deletedClient = await Client.findByIdAndDelete(id); 
+    const deletedClient = await Client.findOneAndDelete({ _id: id });
 
     if (!deletedClient) {
-      return res.status(404).json({ error: 'Cliente no encontrado' });
+      return res.status(404).json({ success: false, message: 'Cliente no encontrado' });
     }
 
-    res.status(200).json({ message: 'Cliente eliminado correctamente' });
+    res.status(200).json({ success: true, message: 'Cliente y usuario relacionados eliminados correctamente' });
   } catch (error) {
     console.error('Error al eliminar el cliente:', error);
-    res.status(500).json({ error: 'Error al eliminar el cliente' });
+    res.status(500).json({ success: false, message: 'Error al eliminar el cliente' });
   }
 };
