@@ -18,3 +18,13 @@ EXPOSE 3004
 
 # Comando para iniciar la API
 CMD ["node", "server.js"]
+
+
+
+
+
+# # Expone el puerto en el que corre tu API
+# EXPOSE 3004
+
+# # Comando para iniciar la API
+# CMD ["node", "server.js"]
