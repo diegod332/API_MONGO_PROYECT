@@ -22,7 +22,7 @@ exports.register = async (req, res) => {
     }
 
     // Validar longitud de la contraseña
-    if (password.length < 9) {
+    if (password.length < 8) {
       return res.status(400).json({ message: 'La contraseña debe tener al menos 9 caracteres' });
     }
 
