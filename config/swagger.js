@@ -11,6 +11,10 @@ const options = {
     },
     servers: [
       {
+        url: 'http://odontologiaintegral.site/api',
+        description: 'Servidor de producción',
+      },
+      {
         url: 'http://localhost:3004/api',
         description: 'Servidor de desarrollo',
       },
