@@ -37,7 +37,7 @@ exports.createAppointment = async (req, res) => {
     let { client, appointmentDate, appointmentTime, service, status } = req.body;
 
     // Validar que todos los campos requeridos estén presentes
-    if (!client || !appointmentDate || !appointmentTime || !service) {
+    if (!client || !appointmentDate || !appointmentTime || !service || !status) {
       return res.status(400).json({ success: false, message: 'Todos los campos son obligatorios' });
     }
 
